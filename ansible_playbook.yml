@@ -1,0 +1,84 @@
+---
+- name: Ensure required packages and deploy app
+  hosts: localhost
+  connection: local
+  become: yes
+
+  vars:
+    packages:
+      - git
+    project_src: "/home/DhanushS/Documents/devops_proj"
+    deploy_dir: "/opt/library-management-system"
+
+  tasks:
+    - name: Gather installed package facts
+      package_facts:
+        manager: auto
+
+    - name: Ensure required packages are installed
+      package:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ packages }}"
+      when: item not in ansible_facts.packages
+
+    - name: Debug package installation status
+      debug:
+        msg: "Package {{ item }} is installed."
+      loop: "{{ packages }}"
+
+    # Check and install Docker
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_check
+      ignore_errors: yes
+
+    - name: Install Docker if not present
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+      when: docker_check.rc != 0
+
+    # Check and install Docker Compose
+    - name: Check if Docker Compose is installed
+      command: docker compose version
+      register: compose_check
+      ignore_errors: yes
+
+    - name: Install Docker Compose if not present
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: yes
+      when: compose_check.rc != 0
+
+    # Check and install Jenkins
+    - name: Check if Jenkins is installed
+      command: jenkins --version
+      register: jenkins_check
+      ignore_errors: yes
+
+    - name: Install Jenkins if not present
+      apt:
+        name: jenkins
+        state: present
+        update_cache: yes
+      when: jenkins_check.rc != 0
+
+    - name: Ensure deploy directory exists
+      file:
+        path: "{{ deploy_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy project files to deploy directory
+      synchronize:
+        src: "{{ project_src }}/"
+        dest: "{{ deploy_dir }}/"
+        recursive: yes
+        delete: no
+
+    - name: Deploy Docker Compose stack
+      community.docker.docker_compose_v2:
+        project_src: "{{ deploy_dir }}"
