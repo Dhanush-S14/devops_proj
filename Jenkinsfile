@@ -1,14 +1,9 @@
 pipeline {
     agent any
     stages {
-        stage('Copy Files from devops_repo') {
+        stage('Checkout') {
             steps {
-                sh '''
-                    rm -rf *
-                    cp -r /home/DhanushS/Documents/devops_proj/* .
-                    sudo chown -R jenkins:jenkins .
-                    sudo chmod -R u+rwX .
-                '''
+                git branch: 'main', url: 'https://github.com/Dhanush-S14/devops_proj.git'
             }
         }
         stage('Cleanup') {
@@ -43,3 +38,5 @@ pipeline {
         }
     }
 }
+
+
