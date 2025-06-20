@@ -1,14 +1,30 @@
 package com.devops.library_management_system;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.prometheus.client.exporter.PushGateway;
+import io.prometheus.client.CollectorRegistry;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
 
 public class LibraryMain {
     static final Logger logger = Logger.getLogger(LibraryMain.class);
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
-        
+        PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+        Counter operationCounter = Counter.builder("library_cli_operations_total")
+                                          .description("Total number of library operations executed")
+                                          .register(prometheusRegistry);
+
+        Counter successCounter = Counter.builder("library_cli_success_total")
+                                        .description("Number of successful operations")
+                                        .register(prometheusRegistry);
+
         if (args.length < 3) {
             logger.error("Usage: java -jar library-system.jar <bookId> <memberId> <operation>");
             return;
@@ -23,7 +39,6 @@ public class LibraryMain {
         logger.info("\n1: Add Book.\n2: Issue Book.\n3: Return Book.\n4: Check Availability.\n5: View All Books.\n6: Exit.");
         logger.info("\nYour choice: " + operation);
 
-        // Initialize library with sample books
         Library library = new Library();
         library.addBook(new Book(101, "Java Programming", "John Doe"));
         library.addBook(new Book(102, "Data Structures", "Jane Smith"));
@@ -31,6 +46,8 @@ public class LibraryMain {
 
         String result = "";
         boolean success = false;
+
+        operationCounter.increment();
 
         switch (operation) {
             case 1:
@@ -56,7 +73,7 @@ public class LibraryMain {
                 }
                 break;
             case 5:
-                result = "Total books: " + library.getTotalBooks() + 
+                result = "Total books: " + library.getTotalBooks() +
                         ", Available: " + library.getAvailableBooks();
                 success = true;
                 break;
@@ -68,8 +85,16 @@ public class LibraryMain {
             logger.info("Result: " + result);
             if (success) {
                 logger.info("Operation completed successfully");
+                successCounter.increment();
             }
+        }
+
+        
+        try {
+            PushGateway pg = new PushGateway("localhost:9091"); // Change if remote
+            pg.pushAdd(prometheusRegistry.getPrometheusRegistry(), "library-cli-job");
+        } catch (IOException e) {
+            logger.error("Failed to push metrics to Prometheus PushGateway: " + e.getMessage());
         }
     }
 }
-
