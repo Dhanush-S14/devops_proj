@@ -1,9 +1,19 @@
 pipeline {
     agent any
     stages {
+        stage('Copy Files from devops_repo') {
+            steps {
+                sh '''
+                    rm -rf *
+                    cp -r /home/DhanushS/Documents/devops_proj/* .
+                    sudo chown -R jenkins:jenkins .
+                    sudo chmod -R u+rwX .
+                '''
+            }
+        }
         stage('Cleanup') {
             steps {
-                sh 'rm -f /var/lib/jenkins/workspace/devops_proj/target/sonar/.sonar_lock'
+                sh 'rm -f target/sonar/.sonar_lock'
             }
         }
         stage('Build') {
@@ -18,7 +28,7 @@ pipeline {
         }
         stage('Dependency Scanning') {
             steps {
-                sh '/home/DhanushS/Documents/devops_proj/dependency-check/dependency-check/bin/dependency-check.sh --project library-management-system --scan . --disableCentral'
+                sh './dependency-check/dependency-check/bin/dependency-check.sh --project library-management-system --scan . --disableCentral'
             }
         }
         stage('Build Docker Image') {
@@ -28,7 +38,7 @@ pipeline {
         }
         stage('Ansible Deploy and Monitoring') {
             steps {
-                sh 'ansible-playbook -i /home/DhanushS/Documents/devops_proj/inventory.ini /home/DhanushS/Documents/devops_proj/ansible_playbook.yml'
+                sh 'ansible-playbook -i inventory.ini ansible_playbook.yml'
             }
         }
     }
