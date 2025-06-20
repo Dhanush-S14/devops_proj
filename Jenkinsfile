@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     stages {
         stage('Cleanup') {
             steps {
@@ -54,3 +58,4 @@ pipeline {
         }
     }
 }
+
