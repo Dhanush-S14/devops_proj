@@ -1,11 +1,9 @@
 package com.devops.library_management_system;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.prometheus.client.exporter.PushGateway;
-import io.prometheus.client.CollectorRegistry;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -17,13 +15,6 @@ public class LibraryMain {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         PrometheusMeterRegistry prometheusRegistry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        Counter operationCounter = Counter.builder("library_cli_operations_total")
-                                          .description("Total number of library operations executed")
-                                          .register(prometheusRegistry);
-
-        Counter successCounter = Counter.builder("library_cli_success_total")
-                                        .description("Number of successful operations")
-                                        .register(prometheusRegistry);
 
         if (args.length < 3) {
             logger.error("Usage: java -jar library-system.jar <bookId> <memberId> <operation>");
@@ -47,7 +38,12 @@ public class LibraryMain {
         String result = "";
         boolean success = false;
 
-        operationCounter.increment();
+        // Increment operation counter with operation tag
+        Counter.builder("library_cli_operations_total")
+               .description("Library CLI operations by type")
+               .tags("operation", String.valueOf(operation))
+               .register(prometheusRegistry)
+               .increment();
 
         switch (operation) {
             case 1:
@@ -85,13 +81,16 @@ public class LibraryMain {
             logger.info("Result: " + result);
             if (success) {
                 logger.info("Operation completed successfully");
-                successCounter.increment();
+                Counter.builder("library_cli_success_total")
+                       .description("Successful operations by type")
+                       .tags("operation", String.valueOf(operation))
+                       .register(prometheusRegistry)
+                       .increment();
             }
         }
 
-        
         try {
-            PushGateway pg = new PushGateway("localhost:9091"); // Change if remote
+            PushGateway pg = new PushGateway("localhost:9091");
             pg.pushAdd(prometheusRegistry.getPrometheusRegistry(), "library-cli-job");
         } catch (IOException e) {
             logger.error("Failed to push metrics to Prometheus PushGateway: " + e.getMessage());
