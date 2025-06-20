@@ -9,6 +9,8 @@
       - git
     project_src: "/home/DhanushS/Documents/devops_proj"
     deploy_dir: "/opt/library-management-system"
+    monitoring_src: "{{ project_src }}/monitoring"
+    monitoring_dest: "{{ deploy_dir }}/monitoring"
 
   tasks:
     - name: Gather installed package facts
@@ -79,6 +81,29 @@
         recursive: yes
         delete: no
 
-    - name: Deploy Docker Compose stack
+    - name: Deploy main app Docker Compose stack (if any)
       community.docker.docker_compose_v2:
         project_src: "{{ deploy_dir }}"
+      register: app_compose
+
+    - name: Ensure monitoring directory exists
+      file:
+        path: "{{ monitoring_dest }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy monitoring stack (Prometheus + PushGateway)
+      synchronize:
+        src: "{{ monitoring_src }}/"
+        dest: "{{ monitoring_dest }}/"
+        recursive: yes
+
+    - name: Deploy monitoring Docker Compose stack
+      community.docker.docker_compose_v2:
+        project_src: "{{ monitoring_dest }}"
+      register: monitoring_compose
+
+    - name: Print monitoring deployment result
+      debug:
+        var: monitoring_compose
+
