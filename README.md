@@ -1,4 +1,4 @@
-# Library Management System
+# Library Management System for devops
 
 An interactive CLI-based Library Management System for managing books
 , members, and book borrowings.
