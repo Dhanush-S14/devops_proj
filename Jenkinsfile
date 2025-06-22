@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Static Code Analysis') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.projectKey=library-management-system -Dsonar.host.url=http://localhost:9000 -Dsonar.token=squ_6a79e76db41eafbf3c7547dfb26a327ef3f88b81'
+                sh 'mvn sonar:sonar -Dsonar.projectKey=library-management-system -Dsonar.host.url=http://localhost:9000 -Dsonar.token=<squ_token here>'
             }
         }
         stage('Dependency Scanning') {
