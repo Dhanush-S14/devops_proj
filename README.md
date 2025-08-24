@@ -5,6 +5,9 @@ A DevOps-driven automation project demonstrating the full lifecycle of a Java-ba
 An interactive CLI-based Library Management System for managing books
 , members, and book borrowings.
 
+# Entire Documented File for Detailed Explaination
+-https://drive.google.com/file/d/1tdoJBO4PixR3luxwAzWfv6zy-DHmnGb6/view?usp=sharing
+
 ## Features of CLI-based Library Management System
 
 - **Add, Update, and Remove Books**
@@ -54,4 +57,12 @@ An interactive CLI-based Library Management System for managing books
 - Multi-service orchestration using Docker Compose  
 - Ansible playbook for local automated deployment  
 - Real-time monitoring using Prometheus and Grafana dashboards  
-- CLI metrics tracked using Pushgateway 
+- CLI metrics tracked using Pushgateway
+
+<img width="767" height="397" alt="image" src="https://github.com/user-attachments/assets/846feb27-db18-4b5f-98a9-3271cfc4fe21" />
+<img width="730" height="392" alt="image" src="https://github.com/user-attachments/assets/fa0281c1-ca90-42f9-9e3b-6877092a3772" />
+<img width="1407" height="875" alt="image" src="https://github.com/user-attachments/assets/06a1a19c-d598-4683-b3cc-ee65f5ded105" />
+<img width="1555" height="487" alt="image" src="https://github.com/user-attachments/assets/8e152212-eb5e-4506-b8b4-ceb8ac319f56" />
+<img width="1012" height="511" alt="image" src="https://github.com/user-attachments/assets/be4d11ea-8e3d-445b-b25a-b2be9307d711" />
+
+
